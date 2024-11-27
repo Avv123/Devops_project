@@ -10,11 +10,11 @@ RUN chown -R 42420:42420 /workspace
 # Install dependencies using apk and then Python packages
 RUN pip install -r requirements.txt
 
-EXPOSE 8080
+EXPOSE 4000
 
 ENTRYPOINT ["uvicorn"]
 
-CMD ["main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["main:app", "--host", "0.0.0.0", "--port", "4000"]
 
 
 # this docker image work for OVH CLOUD AI DEPLOY
