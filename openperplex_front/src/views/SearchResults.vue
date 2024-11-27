@@ -187,7 +187,7 @@ const llmResponse = ref('');
 const positionClass = ref('fixed-bottom tempSearchPosition');
 const graph = ref(null);
 const answerBox = ref(null);
-const searchServer = ref('http://127.0.0.1:8000');
+const searchServer = ref('http://127.0.0.1:4000');
 
 
 const storedLocation = localStorage.getItem('userCountryOpenPerplex');
