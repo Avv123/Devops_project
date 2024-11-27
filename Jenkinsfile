@@ -67,6 +67,14 @@ SERPER_API_KEY=${SERPER_API_KEY}
                 }
             }
         }
+        stage('Debug .env Content') {
+    steps {
+        script {
+            sh 'cat openperplex_backend_os/.env'
+        }
+    }
+}
+
     }
     
     
