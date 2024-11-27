@@ -1,10 +1,10 @@
 pipeline {
     agent any
+    
     environment {
         DOCKER_BUILDKIT = 1
-        // Using Jenkins credentials (secret API key)
-        API_SECRET_KEY = credentials('api-secret-key')
     }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -12,62 +12,78 @@ pipeline {
             }
         }
         
-        // Load the .env file and export the variables to the pipeline environment
-        stage('Load .env') {
+        stage('Prepare Secrets') {
             steps {
                 script {
-                    // Read .env file and set the environment variables
-                    def envFile = '/home/aryaman-vishnoi/Desktop/openperplex/openperplex_backend_os/.env'
-                    def envVars = readFile(envFile).split('\n')
-                    envVars.each { line ->
-                        if (line.trim()) {
-                            def (key, value) = line.split('=')
-                            if (key && value) {
-                                env[key.trim()] = value.trim()
-                            }
-                        }
+                    // Dynamically create .env file with multiple API keys
+                    withCredentials([
+                        string(credentialsId: 'cohere-api-key', variable: 'COHERE_API_KEY'),
+                        string(credentialsId: 'groq-api-key', variable: 'GROQ_API_KEY'),
+                        string(credentialsId: 'jina-api-key', variable: 'JINA_API_KEY'),
+                        string(credentialsId: 'serper-api-key',variable:'SERPER_API_KEY')
+                    ]) {
+                        // Create .env file in backend directory
+                        writeFile file: 'openperplex_backend_os/.env', text: """
+COHERE_API_KEY=${COHERE_API_KEY}
+GROQ_API_KEY=${GROQ_API_KEY}
+JINA_API_KEY=${JINA_API_KEY}
+SERPER_API_KEY=${SERPER_API_KEY}
+"""
                     }
                 }
             }
         }
-
-        // Build Backend and Frontend using Docker
+        
         stage('Build Backend and Frontend') {
             steps {
                 script {
-                    // Ensure Docker Compose uses the correct environment variables
-                    dir('path/to/your/docker-compose/folder') {
-                        sh 'docker-compose build'
-                    }
+                    // Build using docker-compose
+                    sh 'docker-compose build'
                 }
             }
         }
-
-        // Run the services with Docker Compose
+        
         stage('Run Services') {
             steps {
                 script {
-                    dir('path/to/your/docker-compose/folder') {
-                        // Pass the environment variables to the Docker container
-                        sh 'docker-compose up -d'
-                    }
+                    // Start services in detached mode
+                    sh 'docker-compose up -d'
                 }
             }
         }
-
-        // Verify that the services are running properly
+        
         stage('Verify Services') {
             steps {
                 script {
+                    // Check running containers
                     sh 'docker ps'
+                    
+                    // Optional: Add health checks
+                    sh '''
+                        docker-compose ps
+                        docker-compose logs backend
+                        docker-compose logs frontend
+                    '''
                 }
             }
         }
     }
-
+    
     post {
         always {
-            cleanWs() // Clean the workspace after the pipeline runs
+            // Clean up workspace and unused docker resources
+            sh 'docker-compose down || true'
+            sh 'docker system prune -f'
+            cleanWs()
+        }
+        
+        failure {
+            // Send notifications or take actions on failure
+            echo "Pipeline failed. Sending notifications..."
+        }
+        
+        success {
+            echo "Pipeline completed successfully!"
         }
     }
 }
