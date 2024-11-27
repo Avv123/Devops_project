@@ -69,21 +69,5 @@ SERPER_API_KEY=${SERPER_API_KEY}
         }
     }
     
-    post {
-        always {
-            // Clean up workspace and unused docker resources
-            sh 'docker-compose down || true'
-            sh 'docker system prune -f'
-            cleanWs()
-        }
-        
-        failure {
-            // Send notifications or take actions on failure
-            echo "Pipeline failed. Sending notifications..."
-        }
-        
-        success {
-            echo "Pipeline completed successfully!"
-        }
-    }
+    
 }
