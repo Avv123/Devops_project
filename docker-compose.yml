@@ -9,7 +9,7 @@ services:
       - "4000:4000"
     expose:
       - "4000" # Allows other services in the same network to communicate
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "4000"]
+
 
   frontend:
     build:
@@ -19,4 +19,4 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-    command: ["npm", "run", "dev"]
+
