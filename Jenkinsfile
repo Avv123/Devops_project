@@ -10,6 +10,15 @@ pipeline {
                 git url: 'https://github.com/Avv123/Devops_project.git', branch: 'main'
             }
         }
+         stage('Load .env') {
+            steps {
+                sh '''#!/bin/bash
+                export $(cat /home/aryaman-vishnoi/Desktop/openperplex/openperplex_backend_os/.env | xargs)
+                # Now the environment variables from .env are available
+                echo "MY_VAR is: $MY_VAR"
+                '''
+            }
+        }
         stage('Build Backend and Frontend') {
             steps {
                 script {
@@ -18,6 +27,7 @@ pipeline {
                         sh 'docker-compose build'
                     }
                 }
+                
             }
         }
         stage('Run Services') {
