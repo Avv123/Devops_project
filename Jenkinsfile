@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_BUILDKIT = 1
+        API_SECRET_KEY = credentials('api-secret-key') // Fetch the secret key securely
     }
     stages {
         stage('Checkout') {
