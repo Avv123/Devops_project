@@ -1,9 +1,9 @@
 pipeline {
     agent any
     stages {
-        stage('Clone Repository') {
+         stage('Checkout') {
             steps {
-                git 'https://github.com/Avv123/Devops_project'
+                git url: 'https://github.com/Avv123/Devops_project.git', branch: 'main'
             }
         }
         stage('Build Backend and Frontend') {
