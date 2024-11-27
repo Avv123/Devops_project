@@ -2,7 +2,8 @@ pipeline {
     agent any
     environment {
         DOCKER_BUILDKIT = 1
-        API_SECRET_KEY = credentials('api-secret-key') // Fetch the secret key securely
+        // Using Jenkins credentials (secret API key)
+        API_SECRET_KEY = credentials('api-secret-key')
     }
     stages {
         stage('Checkout') {
@@ -10,45 +11,60 @@ pipeline {
                 git url: 'https://github.com/Avv123/Devops_project.git', branch: 'main'
             }
         }
-         stage('Load .env') {
+        
+        // Load the .env file and export the variables to the pipeline environment
+        stage('Load .env') {
             steps {
-                sh '''#!/bin/bash
-                export $(cat /home/aryaman-vishnoi/Desktop/openperplex/openperplex_backend_os/.env | xargs)
-                # Now the environment variables from .env are available
-                echo "MY_VAR is: $MY_VAR"
-                '''
+                script {
+                    // Read .env file and set the environment variables
+                    def envFile = '/home/aryaman-vishnoi/Desktop/openperplex/openperplex_backend_os/.env'
+                    def envVars = readFile(envFile).split('\n')
+                    envVars.each { line ->
+                        if (line.trim()) {
+                            def (key, value) = line.split('=')
+                            if (key && value) {
+                                env[key.trim()] = value.trim()
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        // Build Backend and Frontend using Docker
         stage('Build Backend and Frontend') {
             steps {
                 script {
-                    // Make sure to navigate to the folder containing docker-compose.yml
+                    // Ensure Docker Compose uses the correct environment variables
                     dir('path/to/your/docker-compose/folder') {
                         sh 'docker-compose build'
                     }
                 }
-                
             }
         }
+
+        // Run the services with Docker Compose
         stage('Run Services') {
             steps {
                 script {
-                    // Ensure you're in the correct directory where docker-compose.yml is located
                     dir('path/to/your/docker-compose/folder') {
+                        // Pass the environment variables to the Docker container
                         sh 'docker-compose up -d'
                     }
                 }
             }
         }
+
+        // Verify that the services are running properly
         stage('Verify Services') {
             steps {
                 script {
-                    // Check if the services are running properly
                     sh 'docker ps'
                 }
             }
         }
     }
+
     post {
         always {
             cleanWs() // Clean the workspace after the pipeline runs

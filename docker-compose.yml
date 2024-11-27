@@ -8,8 +8,14 @@ services:
     ports:
       - "4000:4000"
     expose:
-      - "4000" # Allows other services in the same network to communicate
-
+      - "4000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - JINA_API_KEY=${JINA_API_KEY}
+      - SERPER_API_KEY=${SERPER_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - API_SECRET_KEY=${API_SECRET_KEY} # The secret key passed from Jenkins
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "4000"]
 
   frontend:
     build:
@@ -19,4 +25,4 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-
+    command: ["npm", "run", "dev"]
