@@ -15,6 +15,7 @@ from sources_manipulation import populate_sources
 app = FastAPI()
 
 # allow_origins=["https://openperplex.com"]
+# origins = ["*"] 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
