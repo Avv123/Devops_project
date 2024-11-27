@@ -5,8 +5,6 @@ services:
     build:
       context: ./openperplex_backend_os
       dockerfile: Dockerfile
-    env_file:
-      - .openperplex_backend_os/.env
     ports:
       - "4000:4000"
     expose:
